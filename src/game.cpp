@@ -1,23 +1,12 @@
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include<cstdlib>
+#include "game.hpp"
 
-using namespace std;
-
-// misc stuff
-vector<vector<char>> swap_x_y(vector<vector<char>> board) {
-  vector<vector<char>> swapped = {{}, {}, {}};
-
-  for (int row=2; row >= 0; row--) {
-    for (int cell=0; cell < 3; cell++) {
-      swapped[cell].push_back(board[row][cell]);
-    }
-  }
-
-  return swapped;
+Game::Game() {
+  board = new_board();
 }
 
-// board stuff
-vector<vector<char>> new_board() {
+game_board Game::new_board() {
   return {
     {'\0', '\0', '\0'},
     {'\0', '\0', '\0'},
@@ -25,12 +14,15 @@ vector<vector<char>> new_board() {
   };
 }
 
-vector<vector<char>> add_letter(vector<vector<char>> board, char letter, int posx, int posy) {
+void Game::set_cell(char letter, int posx, int posy) {
   board[posy][posx] = letter;
-  return board;
 }
 
-void print_board(vector<vector<char>> board) {
+void Game::set_board(game_board new_board) {
+  board = new_board;
+}
+
+void Game::print_board() {
   cout << "    1   2   3\n";
   cout << "  -------------\n";
   for (int row=0; row < 3; row++) {
@@ -50,11 +42,11 @@ void print_board(vector<vector<char>> board) {
   }
 }
 
-char check_cell(vector<vector<char>> board, int posx, int posy) {
+char Game::get_cell(int posx, int posy) {
   return board[posy][posx];
 }
 
-vector<int> prompt(vector<vector<char>> board, int player) {
+vector<int> Game::prompt(int player) {
   vector<int> coords = {0, 0};
 
   while (!coords[0] && !coords[1]) {
@@ -86,9 +78,9 @@ vector<int> prompt(vector<vector<char>> board, int player) {
         break;
       }
     }
-    if (!check_cell(board, y-1, x-1)) {
-      coords[0] = x;
-      coords[1] = y;
+    if (!get_cell(y-1, x-1)) {
+      coords[0] = y;
+      coords[1] = x;
 
       return coords;
     } else {
@@ -98,21 +90,31 @@ vector<int> prompt(vector<vector<char>> board, int player) {
   return coords;
 }
 
-// check stuff
+game_board Game::swap_x_y() {
+  vector<vector<char>> swapped = {{}, {}, {}};
 
-bool check_full_board(vector<vector<char>> board) {
+  for (int row=2; row >= 0; row--) {
+    for (int cell=0; cell < 3; cell++) {
+      swapped[cell].push_back(board[row][cell]);
+    }
+  }
+
+  return swapped;
+}
+
+// check functions
+bool Game::check_full_board() {
   for (int row=0; row < 3; row++) {
     for (int cell=0; cell < 3; cell++) {
       if (board[row][cell] == '\0') return false;
     }
   }
-
   return true;
 }
 
-char check_rows(vector<vector<char>> board) {
+char Game::check_rows(game_board b) {
   for (int row=0; row<3; row++) {
-    vector<char> cells = board[row];
+    vector<char> cells = b[row];
     if (
       (cells[0] == cells[1]) &&
       (cells [0] == cells[2]) &&
@@ -124,34 +126,87 @@ char check_rows(vector<vector<char>> board) {
   return '\0';
 }
 
-char check_diag(vector<vector<char>> board) {
+char Game::check_rows() {
+  return check_rows(board);
+}
+
+char Game::check_diag(game_board b) {
   if (
-    (board[0][0] == board[1][1]) &&
-    (board[0][0] == board[2][2]) &&
-    (board[1][1] == board[2][2]) &&
-    (board[0][0] != '\0')
+    (b[0][0] == b[1][1]) &&
+    (b[0][0] == b[2][2]) &&
+    (b[1][1] == b[2][2]) &&
+    (b[0][0] != '\0')
   ) return board[0][0];
   return '\0';
 }
 
-char check_win(vector<vector<char>> board) {
+char Game::check_diag() {
+  return check_diag(board);
+}
+
+char Game::check_win() {
   char winner;
 
   // check rows first
-  winner = check_rows(board);
+  winner = check_rows();
   if (winner) return winner;
 
     // check cols
-  vector<vector<char>> swapped = swap_x_y(board);
+  game_board swapped = swap_x_y();
   winner = check_rows(swapped);
   if (winner) return winner;
 
   // check diag
-  winner = check_diag(board);
+  winner = check_diag();
   if (winner) return winner;
 
   winner = check_diag(swapped);
   if (winner) return winner;
 
   return '\0';
+}
+
+void Game::start() {
+  int winner = 0;
+  int current = 0;
+  bool end = false;
+
+  while (!end) {
+    system("clear");
+    cout << "===== Player " << current << " =====\n\n";
+
+    print_board();
+    cout << "\n";
+
+    vector<int> coords = prompt(current);
+
+    set_cell(current == 0 ? 'X' : 'O', coords[0]-1, coords[1]-1);
+
+    char check_winner = check_win();
+    bool is_full = check_full_board();
+
+    if (check_winner) {
+      winner = check_winner == 'X' ? 0 : 1;
+      end = true;
+
+      break;
+    } else if (is_full) {
+      winner = -1;
+      end = true;
+
+      break;
+    }
+
+    current = current == 0 ? 1 : 0;
+  }
+
+  system("clear");
+  cout << "===== Player " << current << " =====\n\n";
+  print_board();
+
+  if (winner == -1) {
+    cout << "\nIt's a tie.\n";
+  } else {
+    cout << "\nPlayer " << winner << " wins!\n";
+  }
 }
