@@ -91,7 +91,7 @@ vector<int> Game::prompt(int player) {
 }
 
 game_board Game::swap_x_y() {
-  vector<vector<char>> swapped = {{}, {}, {}};
+  game_board swapped = {{}, {}, {}};
 
   for (int row=2; row >= 0; row--) {
     for (int cell=0; cell < 3; cell++) {
