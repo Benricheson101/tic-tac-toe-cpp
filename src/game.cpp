@@ -1,5 +1,4 @@
 #include <iostream>
-#include<cstdlib>
 #include "game.hpp"
 
 Game::Game() {
@@ -23,22 +22,49 @@ void Game::set_board(game_board new_board) {
 }
 
 void Game::print_board() {
-  cout << "    1   2   3\n";
-  cout << "  -------------\n";
-  for (int row=0; row < 3; row++) {
-    for (int cell=0; cell < 3; cell++) {
+  string vertical_pipe = "║";
+
+  // print top numbers and top border
+  cout << "    1   2   3  \n";
+  cout << "  ╔═══╦═══╦═══╗\n";
+
+  for (int row = 0; row < 3; row++) {
+    for (int cell = 0; cell < 3; cell++) {
+      // get the current cell
       char c = board[row][cell];
+      // print line number with a space afterwards
       if (cell == 0) cout << row+1 << " ";
-      cout << "| ";
+      // print vertical line
+      cout << vertical_pipe;
+      // add a space after the line
+      cout << " ";
+      // if there is no letter/the cell is empty
       if (c == '\0') {
-        cout << "-";
+        // print a space
+        cout << " ";
       } else {
-        cout << board[row][cell];
+        // print the char
+        cout << c;
       }
+      // add a space after
       cout << " ";
     }
-    cout << "|\n";
-    cout << "  -------------\n";
+    // add closing line and linebreak after printing the current line
+    cout << vertical_pipe << "\n";
+
+    // print bottom row
+    switch (row) {
+      // print the line after lines 1 and 2
+      case 0:
+      case 1:
+        cout << "  ╠═══╬═══╬═══╣\n";
+        break;
+
+      // print the line after line 3
+      case 2:
+        cout << "  ╚═══╩═══╩═══╝\n";
+        break;
+    }
   }
 }
 
@@ -50,7 +76,6 @@ vector<int> Game::prompt(int player) {
   vector<int> coords = {0, 0};
 
   while (!coords[0] && !coords[1]) {
-    // x coord
 
     int x, y;
     while (!coords[0]) {
@@ -172,7 +197,9 @@ void Game::start() {
   bool end = false;
 
   while (!end) {
-    system("clear");
+    // clear the screen
+    cout << "\033[2J\033[1;1H";
+
     cout << "===== Player " << current << " =====\n\n";
 
     print_board();
@@ -200,7 +227,9 @@ void Game::start() {
     current = current == 0 ? 1 : 0;
   }
 
-  system("clear");
+  // clear the screen
+  cout << "\033[2J\033[1;1H";
+
   cout << "===== Player " << current << " =====\n\n";
   print_board();
 

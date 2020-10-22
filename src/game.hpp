@@ -28,7 +28,7 @@ class Game {
 
   public:
     Game();
-    void set_board(game_board new_board); // in case u wanna use ur own pre-filled board (mostly for debug lol)
+    void set_board(game_board new_board);
     void print_board();
     void start();
 };
